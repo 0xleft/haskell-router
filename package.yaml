@@ -23,6 +23,8 @@ dependencies:
 - base >= 4.7 && < 5
 - hspec
 - hspec-discover
+- pcap
+- bytestring
 
 ghc-options:
 - -Wall
@@ -39,7 +41,7 @@ library:
   source-dirs: src
 
 executables:
-  haskell-router-exe:
+  haskell-router:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
