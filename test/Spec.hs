@@ -1,2 +1,7 @@
+import Test.Hspec
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = hspec $ do
+  describe "This test shoudl not fail" $ do
+    it "shoud not fail" $ do
+      True `shouldBe` True
