@@ -26,3 +26,13 @@ data IPPacket = IPPacket {
   destinationIPAddr :: Word32,
   options :: [Word8] -- basicaly whatever is left until we find 0x00 (aka EOL)
 }
+
+data PacketQueue = PacketQueue {
+  maxLength :: Int,
+  packets :: [IPPacket] -- right?
+}
+
+append :: PacketQueue -> IPPacket -> ()
+append packetQueue packet = case ((length (packets packetQueue)) <= (maxLength packetQueue)) of
+  True -> ()
+  False -> ()

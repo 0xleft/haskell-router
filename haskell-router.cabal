@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      Router.Args
       Router.Packet
       Router.Parser
   other-modules:
