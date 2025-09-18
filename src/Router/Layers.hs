@@ -33,7 +33,7 @@ data Ethernet = Ethernet {
   packetType :: PacketType
 }
 
-data Wifi = Wifi { -- todo? do we even need this?
+data Wifi = Wifi { -- todo? do we even need this?; No, but otherwise the LinkLayer type looked really empty, we can remove it now that the structure is defined
 }
 
 -- https://www.geeksforgeeks.org/computer-networks/tcp-ip-packet-format/ and also the wireshark file
@@ -52,7 +52,19 @@ data IP = IP {
   parent :: LinkLayer
 }
 
+-- Source: https://datatracker.ietf.org/doc/html/rfc9293
 data TCP = TCP {
+  sourcePort :: Word16
+  destinationPort :: Word16
+  squenceNumber :: Word32
+  acknowlegdementNumber :: Word32
+  dOffset :: Word8 -- Actually 4 bit, number of 32 Bit words in the header, Thus indicating where the data begins
+  rSrvd :: Word8 -- Actually 4 bit, basically must be 0 if both end-points don't implement it
+  controlBits :: Word8 -- Look at documentation what every bit is set for.
+  window :: Word32 -- Normally it is 16 Word, but RFC recommends it is 32 bit. It is the number of octets we can accept
+  checkSum :: Word16 -- TODO: I can't be bothered to figure this out rn
+  urgentPointer :: Word16 -- Only used when URG bit in controlBits is set, points to the the first data that is not urgent.
+  options :: Integer -- Size of (dOffset-5)*32; only present when dOffset > 5; TODO: Figure out if we actually need this
   parent :: NetworkLayer
 }
 
