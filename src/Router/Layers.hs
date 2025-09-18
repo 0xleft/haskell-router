@@ -30,7 +30,7 @@ data ApplicationLayer = ApplicationLayerTxt Txt | ApplicationLayerHtml Html
 data Ethernet = Ethernet {
   destinationMac :: [Word8], -- of length 6!
   sourceMac :: [Word8], -- also of length 6
-  packetType :: Word16 -- TODO figure out how to set it using an enum but still keeping the binary represenation
+  packetType :: PacketType
 }
 
 data Wifi = Wifi { -- todo? do we even need this?
