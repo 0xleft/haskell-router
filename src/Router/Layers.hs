@@ -9,7 +9,7 @@ module Router.Layers (
 
 ) where
 
-import Data.Word (Word32, Word16, Word8)
+import Data.Word (Word64, Word32, Word16, Word8)
 import Router.Layers.Ethernet(PacketType(..))
 
 
@@ -17,7 +17,7 @@ import Router.Layers.Ethernet(PacketType(..))
 -- generic catch all case for layers
 data PacketLayer = PacketLinkLayer LinkLayer | PacketNetworkLayer NetworkLayer | PacketTransferLayer TransferLayer | PacketApplicationLayer ApplicationLayer
 
-data LinkLayer = LinkLayerEth Ethernet | LinkLayerWifi Wifi
+data LinkLayer = LinkLayerEth Ethernet | LinkLayerBeaconFrame BeaconFrame
 data NetworkLayer = NetworkLayerIP IP
 data TransferLayer = TransferLayerUDP UDP | TransferLayerTCP TCP
 data ApplicationLayer = ApplicationLayerTxt Txt | ApplicationLayerHtml Html
@@ -28,7 +28,20 @@ data Ethernet = Ethernet {
   packetType :: PacketType
 }
 
-data Wifi = Wifi { -- todo? do we even need this?; No, but otherwise the LinkLayer type looked really empty, we can remove it now that the structure is defined
+-- https://mrncciew.com/2014/10/08/802-11-mgmt-beacon-frame/
+-- WireShark capture of BeaconFrame: https://documentation.meraki.com/MR/Wireless_Troubleshooting/Analyzing_Wireless_Packet_Captures
+data BeaconFrame = BeaconFrame { 
+  timeStamp :: Word64, -- Time in microseconds since the access point has been active
+  beaconInterval :: Word16, -- Time in TU (1 TU = 1024 microseconds) ; default = 100 TU (102.4 milliseconds)
+  capableInformation :: Word16, -- Advertised capabilities of network
+  ssid :: SSID
+}
+
+-- https://mrncciew.com/2014/10/08/802-11-mgmt-beacon-frame/ (Sec. 4 on SSID)
+data SSID = SSID {
+  elId :: Word16, -- I think in all cases it should be 0b00
+  tagLength :: Word16, -- Just the length if the string
+  ssidName :: String -- A string with length of tagLength 
 }
 
 -- https://www.geeksforgeeks.org/computer-networks/tcp-ip-packet-format/ and also the wireshark file
