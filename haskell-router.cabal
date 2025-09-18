@@ -33,6 +33,8 @@ library
       Router.Layers.Tcp
       Router.Layers.Ip
       Router.Layers.Txt
+      Router.Layers.BeaconFrame
+      Router.Util
   other-modules:
       Paths_haskell_router
   autogen-modules:

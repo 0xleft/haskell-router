@@ -6,6 +6,7 @@ module Router.Layers (
   TransferLayer(..),
   ApplicationLayer(..),
   PacketLayer(..),
+  SSID(..),
 
 ) where
 
@@ -39,8 +40,8 @@ data BeaconFrame = BeaconFrame {
 
 -- https://mrncciew.com/2014/10/08/802-11-mgmt-beacon-frame/ (Sec. 4 on SSID)
 data SSID = SSID {
-  elId :: Word16, -- I think in all cases it should be 0b00
-  tagLength :: Word16, -- Just the length if the string
+  elId :: Word8, -- I think in all cases it should be 0b00
+  tagLength :: Word8, -- Just the length if the string
   ssidName :: String -- A string with length of tagLength 
 }
 
