@@ -29,6 +29,10 @@ library
       Router.Layers
       Router.Packet
       Router.Parser
+      Router.Layers.Ethernet
+      Router.Layers.Tcp
+      Router.Layers.Ip
+      Router.Layers.Txt
   other-modules:
       Paths_haskell_router
   autogen-modules:
