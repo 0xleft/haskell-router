@@ -1,8 +1,8 @@
 module Router.Layers.Ethernet (
-  PacketType(..),
+  PacketType(..)
 ) where 
 
-import Data.Word (Word32, Word16, Word8)
+import Data.Word (Word16)
 
 data PacketType = IPv6Packet | IPv4Packet
 -- Gives the correct Word16 type for the data packet

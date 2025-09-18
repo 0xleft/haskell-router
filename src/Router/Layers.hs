@@ -1,33 +1,28 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
 module Router.Layers (
-  LinkLayer(..),
-  NetworkLayer(..),
-  TransferLayer(..),
-  ApplicationLayer(..),
   PacketLayer(..),
-  SSID(..),
 
+  BeaconFrame(..),
+  Ethernet(..),
+  Ip(..),
+  Tcp(..),
+  Udp(..),
+  Txt(..),
+  Html(..)
 ) where
 
 import Data.Word (Word64, Word32, Word16, Word8)
-import Router.Layers.Ethernet(PacketType(..))
-
-
+import Router.Layers.BeaconFrame (SSID(..))
+import Router.Layers.Ethernet (PacketType(..))
 
 -- generic catch all case for layers
 data PacketLayer = PacketLinkLayer LinkLayer | PacketNetworkLayer NetworkLayer | PacketTransferLayer TransferLayer | PacketApplicationLayer ApplicationLayer
 
 data LinkLayer = LinkLayerEth Ethernet | LinkLayerBeaconFrame BeaconFrame
-data NetworkLayer = NetworkLayerIP IP
-data TransferLayer = TransferLayerUDP UDP | TransferLayerTCP TCP
+data NetworkLayer = NetworkLayerIP Ip
+data TransferLayer = TransferLayerUDP Udp | TransferLayerTCP Tcp
 data ApplicationLayer = ApplicationLayerTxt Txt | ApplicationLayerHtml Html
-
-data Ethernet = Ethernet {
-  destinationMac :: [Word8], -- of length 6!
-  sourceMac :: [Word8], -- also of length 6
-  packetType :: PacketType
-}
 
 -- https://mrncciew.com/2014/10/08/802-11-mgmt-beacon-frame/
 -- WireShark capture of BeaconFrame: https://documentation.meraki.com/MR/Wireless_Troubleshooting/Analyzing_Wireless_Packet_Captures
@@ -38,15 +33,14 @@ data BeaconFrame = BeaconFrame {
   ssid :: SSID
 }
 
--- https://mrncciew.com/2014/10/08/802-11-mgmt-beacon-frame/ (Sec. 4 on SSID)
-data SSID = SSID {
-  elId :: Word8, -- I think in all cases it should be 0b00
-  tagLength :: Word8, -- Just the length if the string
-  ssidName :: String -- A string with length of tagLength 
+data Ethernet = Ethernet {
+  destinationMac :: [Word8], -- of length 6!
+  sourceMac :: [Word8], -- also of length 6
+  packetType :: PacketType
 }
 
 -- https://www.geeksforgeeks.org/computer-networks/tcp-ip-packet-format/ and also the wireshark file
-data IP = IP {
+data Ip = Ip {
   versionAndHeaderLenth :: Word8, -- ugly but we dont have Word4 type :(
   typeOfService :: Word8,
   totalLength :: Word16,
@@ -55,14 +49,14 @@ data IP = IP {
   timeToLive :: Word8,
   protocol :: Word8,
   headerChecksum :: Word16,
-  sourceIPAddr :: Word32,
-  destinationIPAddr :: Word32,
+  sourceIpAddr :: Word32,
+  destinationIpAddr :: Word32,
   options :: [Word8], -- basicaly whatever is left until we find 0x00 (aka EOL)
   parent :: LinkLayer
 }
 
 -- Source: https://datatracker.ietf.org/doc/html/rfc9293
-data TCP = TCP {
+data Tcp = Tcp {
   sourcePort :: Word16,
   destinationPort :: Word16,
   squenceNumber :: Word32,
@@ -77,7 +71,7 @@ data TCP = TCP {
   parent :: NetworkLayer
 }
 
-data UDP = UDP {
+data Udp = Udp {
   parent :: NetworkLayer
 }
 
@@ -85,11 +79,6 @@ data Txt = Txt {
   parent :: TransferLayer
 }
 
-
 data Html = Html {
   parent :: TransferLayer
-}
-
-data Packet = Packet {
-  
 }
