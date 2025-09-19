@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 
 module Router.Layers.BeaconFrame (
   SSID(..)
@@ -5,6 +6,7 @@ module Router.Layers.BeaconFrame (
 
 import Router.Util (intToWord8)
 import Data.Word (Word8)
+import Data.Data
 
 getSSID :: String -> SSID
 getSSID "" = SSID (0) (0) ("\0")
@@ -19,4 +21,4 @@ data SSID = SSID {
   elId :: Word8, -- I think in all cases it should be 0b00
   tagLength :: Word8, -- Just the length if the string
   ssidName :: String -- A string with length of tagLength 
-}
+} deriving (Data, Typeable)

@@ -25,6 +25,8 @@ dependencies:
 - hspec-discover
 - pcap
 - bytestring
+- syb
+- text
 
 ghc-options:
 - -Wall

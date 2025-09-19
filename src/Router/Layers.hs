@@ -1,7 +1,12 @@
-{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE DuplicateRecordFields, DeriveDataTypeable #-}
 
 module Router.Layers (
   PacketLayer(..),
+
+  LinkLayer(..),
+  NetworkLayer(..),
+  TransferLayer(..),
+  ApplicationLayer(..),
 
   BeaconFrame(..),
   Ethernet(..),
@@ -15,14 +20,15 @@ module Router.Layers (
 import Data.Word (Word64, Word32, Word16, Word8)
 import Router.Layers.BeaconFrame (SSID(..))
 import Router.Layers.Ethernet (PacketType(..))
+import Data.Data
 
 -- generic catch all case for layers
-data PacketLayer = PacketLinkLayer LinkLayer | PacketNetworkLayer NetworkLayer | PacketTransferLayer TransferLayer | PacketApplicationLayer ApplicationLayer
+data PacketLayer = PacketLinkLayer LinkLayer | PacketNetworkLayer NetworkLayer | PacketTransferLayer TransferLayer | PacketApplicationLayer ApplicationLayer deriving (Data, Typeable)
 
-data LinkLayer = LinkLayerEth Ethernet | LinkLayerBeaconFrame BeaconFrame
-data NetworkLayer = NetworkLayerIP Ip
-data TransferLayer = TransferLayerUDP Udp | TransferLayerTCP Tcp
-data ApplicationLayer = ApplicationLayerTxt Txt | ApplicationLayerHtml Html
+data LinkLayer = LinkLayerEth Ethernet | LinkLayerBeaconFrame BeaconFrame deriving (Data, Typeable)
+data NetworkLayer = NetworkLayerIP Ip deriving (Data, Typeable)
+data TransferLayer = TransferLayerUDP Udp | TransferLayerTCP Tcp deriving (Data, Typeable)
+data ApplicationLayer = ApplicationLayerTxt Txt | ApplicationLayerHtml Html deriving (Data, Typeable)
 
 -- https://mrncciew.com/2014/10/08/802-11-mgmt-beacon-frame/
 -- WireShark capture of BeaconFrame: https://documentation.meraki.com/MR/Wireless_Troubleshooting/Analyzing_Wireless_Packet_Captures
@@ -31,17 +37,17 @@ data BeaconFrame = BeaconFrame {
   beaconInterval :: Word16, -- Time in TU (1 TU = 1024 microseconds) ; default = 100 TU (102.4 milliseconds)
   capableInformation :: Word16, -- Advertised capabilities of network
   ssid :: SSID
-}
+} deriving (Data, Typeable)
 
 data Ethernet = Ethernet {
   destinationMac :: [Word8], -- of length 6!
   sourceMac :: [Word8], -- also of length 6
   packetType :: PacketType
-}
+} deriving (Data, Typeable)
 
 -- https://www.geeksforgeeks.org/computer-networks/tcp-ip-packet-format/ and also the wireshark file
 data Ip = Ip {
-  versionAndHeaderLenth :: Word8, -- ugly but we dont have Word4 type :(
+  versionAndHeaderLength :: Word8, -- ugly but we dont have Word4 type :(
   typeOfService :: Word8,
   totalLength :: Word16,
   identification :: Word16,
@@ -53,7 +59,7 @@ data Ip = Ip {
   destinationIpAddr :: Word32,
   options :: [Word8], -- basicaly whatever is left until we find 0x00 (aka EOL)
   parent :: LinkLayer
-}
+} deriving (Data, Typeable)
 
 -- Source: https://datatracker.ietf.org/doc/html/rfc9293
 data Tcp = Tcp {
@@ -69,16 +75,16 @@ data Tcp = Tcp {
   urgentPointer :: Word16, -- Only used when URG bit in controlBits is set, points to the the first data that is not urgent.
   options :: Integer, -- Size of (dOffset-5)
   parent :: NetworkLayer
-}
+} deriving (Data, Typeable)
 
 data Udp = Udp {
   parent :: NetworkLayer
-}
+} deriving (Data, Typeable)
 
 data Txt = Txt {
   parent :: TransferLayer
-}
+} deriving (Data, Typeable)
 
 data Html = Html {
   parent :: TransferLayer
-}
+} deriving (Data, Typeable)
