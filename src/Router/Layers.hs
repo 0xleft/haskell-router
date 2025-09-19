@@ -3,7 +3,7 @@
 module Router.Layers (
   PacketLayer(..),
 
-  BeaconFrame(..),
+  BeaconFrameBody(..),
   Ethernet(..),
   Ip(..),
   Tcp(..),
@@ -13,7 +13,7 @@ module Router.Layers (
 ) where
 
 import Data.Word (Word64, Word32, Word16, Word8)
-import Router.Layers.BeaconFrame (SSID(..))
+import Router.Layers.BeaconFrame (SSID(..), MACHeader(..), BeaconFrameBody(..))
 import Router.Layers.Ethernet (PacketType(..))
 
 -- generic catch all case for layers
@@ -24,14 +24,13 @@ data NetworkLayer = NetworkLayerIP Ip
 data TransferLayer = TransferLayerUDP Udp | TransferLayerTCP Tcp
 data ApplicationLayer = ApplicationLayerTxt Txt | ApplicationLayerHtml Html
 
--- https://mrncciew.com/2014/10/08/802-11-mgmt-beacon-frame/
--- WireShark capture of BeaconFrame: https://documentation.meraki.com/MR/Wireless_Troubleshooting/Analyzing_Wireless_Packet_Captures
-data BeaconFrame = BeaconFrame { 
-  timeStamp :: Word64, -- Time in microseconds since the access point has been active
-  beaconInterval :: Word16, -- Time in TU (1 TU = 1024 microseconds) ; default = 100 TU (102.4 milliseconds)
-  capableInformation :: Word16, -- Advertised capabilities of network
-  ssid :: SSID
+
+data BeaconFrame = BeaconFrame {
+  macHeader :: MACHeader,
+  beaconFrameBody :: BeaconFrameBody
 }
+
+
 
 data Ethernet = Ethernet {
   destinationMac :: [Word8], -- of length 6!
