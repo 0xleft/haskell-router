@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.38.1.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -27,8 +27,16 @@ library
   exposed-modules:
       Router.Args
       Router.Layers
+      Router.Layers.BeaconFrame
+      Router.Layers.Ethernet
+      Router.Layers.Ip
+      Router.Layers.Tcp
+      Router.Layers.Txt
+      Router.Layers.Udp
       Router.Packet
       Router.Parser
+      Router.Services.Beacon
+      Router.Util
   other-modules:
       Paths_haskell_router
   autogen-modules:
