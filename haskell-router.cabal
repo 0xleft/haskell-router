@@ -35,6 +35,7 @@ library
       Router.Layers.Udp
       Router.Packet
       Router.Parser
+      Router.RouterInfo
       Router.Services.Beacon
       Router.Services.Receiver
       Router.Services.Sender
