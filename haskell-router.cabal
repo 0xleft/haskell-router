@@ -36,6 +36,8 @@ library
       Router.Packet
       Router.Parser
       Router.Services.Beacon
+      Router.Services.Receiver
+      Router.Services.Sender
       Router.Util
   other-modules:
       Paths_haskell_router
