@@ -2,6 +2,8 @@ module Router.Services.Receiver (
   start
 ) where
 
-start :: PacketQueue ->  IO ()
-start = do
+import Router.Packet (PacketQueue)
+
+start :: PacketQueue -> IO ()
+start pq = do
   return ()
