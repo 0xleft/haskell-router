@@ -11,7 +11,7 @@ import Control.Concurrent (forkIO)
 
 main :: IO ()
 main = do
-  pq = PacketQueue 1000 []
+  let pq = PacketQueue { maxLength = 1000, packets = [] }
   -- todo replace with MVar
 
   _ <- forkIO $ Beacon.start -- thread
