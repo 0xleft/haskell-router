@@ -52,6 +52,7 @@ library
     , hspec
     , hspec-discover
     , pcap
+    , time
   default-language: Haskell2010
 
 executable haskell-router
@@ -70,6 +71,7 @@ executable haskell-router
     , hspec
     , hspec-discover
     , pcap
+    , time
   default-language: Haskell2010
 
 test-suite haskell-router-test
@@ -89,4 +91,5 @@ test-suite haskell-router-test
     , hspec
     , hspec-discover
     , pcap
+    , time
   default-language: Haskell2010

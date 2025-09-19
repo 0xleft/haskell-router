@@ -2,6 +2,23 @@ module Router.Services.Beacon (
   start
 ) where
 
+import Control.Concurrent
+import Data.Time.Clock.POSIX (getPOSIXTime)
+
 start :: IO ()
-start = do
+start = 
+  do
+  beaconLoop 1024
+  return ()
+
+
+
+beaconLoop :: Int -> IO ()
+beaconLoop delay = do
+  threadDelay delay
+
+  -- TODO: create a beacon frame using the current time
+  let curTime = (round . (* 1000000)) <$> getPOSIXTime
+
+  beaconLoop delay 
   return ()
