@@ -40,7 +40,6 @@ library
       Router.Services.Beacon
       Router.Services.Receiver
       Router.Services.Sender
-      Router.Types
       Router.Util
   other-modules:
       Paths_haskell_router

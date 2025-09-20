@@ -4,10 +4,12 @@ module Router.Packer (
   hasField,
   getFields,
   getRecursiveFields,
-  convertFields
+  convertFields,
+  pack
 ) where
 
-import Router.Types (Packable(..))
+import Router.Layers.BeaconFrame (SSID(..), BeaconFrameBody(..), MACHeader(..), SupportedRates(..))
+import Router.Layers.Ethernet (PacketType(..), getPacketType)
 import Router.Packet (Packet(..))
 import qualified Data.ByteString.Char8 as B
 import Data.Dynamic (Dynamic, toDyn, fromDynamic)
@@ -49,8 +51,18 @@ convertField (name, d)
   | Just listW16 <- fromDynamic d :: Maybe [Word16] = concat (map (\x ->  printf "%04X" x) listW16)
   | Just listW32 <- fromDynamic d :: Maybe [Word16] = concat (map (\x ->  printf "%08X" x) listW32)
   | Just listW64 <- fromDynamic d :: Maybe [Word16] = concat (map (\x ->  printf "%016X" x) listW64)
-  | Just packable <- fromDynamic d :: Maybe AnyPackable = B.unpack $ pack packable
-  | otherwise = name
+
+  -- here comes the ugly
+  | Just ssid <- fromDynamic d :: Maybe SSID = convertData ssid
+  | Just packetType <- fromDynamic d :: Maybe PacketType = printf "%04X" $ getPacketType packetType
+  | Just supportedRates <- fromDynamic d :: Maybe SupportedRates = convertData supportedRates
+  | Just beaconFrameBody <- fromDynamic d :: Maybe BeaconFrameBody = convertData beaconFrameBody
+  | Just macheader <- fromDynamic d :: Maybe MACHeader = convertData macheader
+
+  -- end of ugly
+  | Just int <- fromDynamic d :: Maybe Integer = printf "%X" int -- TODO change this?
+  | Just string <- fromDynamic d :: Maybe String = string
+  | otherwise = error "You need to implement conversion from the data type you made to String of hexadecimal. Look at Router.Packer::convertField"
 
 convertFields :: [(String, Dynamic)] -> [String]
 convertFields fields = map convertField fields
@@ -58,10 +70,5 @@ convertFields fields = map convertField fields
 convertData :: Data a => a -> String
 convertData x = concat $ convertFields $ getRecursiveFields x
 
-data AnyPackable = forall p. (Packable p, Data p) => AnyPackable p
-
-instance Packable AnyPackable where
-  pack (AnyPackable p) = B.pack $ convertData p
-
-instance Packable Packet where
-  pack p = B.pack $ convertData $ topLayer p
+pack :: Packet -> B.ByteString
+pack p = B.pack $ convertData $ topLayer p 

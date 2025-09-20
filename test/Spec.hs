@@ -22,7 +22,7 @@ main = hspec $ do
       (Packer.hasField "sourceMac" ethernetLayer) `shouldBe` True
       (Packer.hasField "notexistantfield" ethernetLayer) `shouldBe` False
     
-    it "Should " $ do
+    it "Should " $ do -- todo actualy finish this test
       let eth = Layers.Ethernet [0] [0] Ethernet.IPv4Packet
           ethernetLayer = Layers.PacketLinkLayer (Layers.LinkLayerEth eth)
           ip = Layers.Ip 0 0 0 0 0 0 0 0 0 0 [] ethernetLayer
@@ -35,6 +35,6 @@ main = hspec $ do
           recursiveFields = Packer.getRecursiveFields (topLayer packet)
           convertedFields = Packer.convertFields recursiveFields 
 
-      _ <- putStrLn (Prelude.show convertedFields)
+      _ <- putStrLn (Prelude.show $ Packer.pack packet)
       -- _ <- putStrLn (Prelude.show fields)
       True `shouldBe` True
