@@ -39,7 +39,7 @@ getRecursiveFields :: Data a => a -> [(String, Dynamic)]
 getRecursiveFields x = case (hasField "parent" x) of
   True -> case listToMaybe (filter (\(x, _) -> x == "parent") (getFields x)) of
             Just (_, parent) -> (case fromDynamic parent :: Maybe PacketLayer of  ---- working around types shitfuckery
-                                  Just castValue -> getFields x ++ getRecursiveFields castValue
+                                  Just castValue -> getRecursiveFields castValue ++ (filter (\(x, _) -> x /= "parent") (getFields x))
                                   Nothing -> [("test", toDyn x)]
                                 )
             Nothing -> []

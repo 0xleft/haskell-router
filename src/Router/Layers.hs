@@ -26,8 +26,8 @@ import Data.Data
 data PacketLayer = PacketLinkLayer LinkLayer | PacketNetworkLayer NetworkLayer | PacketTransferLayer TransferLayer | PacketApplicationLayer ApplicationLayer deriving (Data)
 
 data LinkLayer = LinkLayerEth Ethernet | LinkLayerBeaconFrame BeaconFrame deriving (Data)
-data NetworkLayer = NetworkLayerIP Ip deriving (Data)
-data TransferLayer = TransferLayerUDP Udp | TransferLayerTCP Tcp deriving (Data)
+data NetworkLayer = NetworkLayerIp Ip deriving (Data)
+data TransferLayer = TransferLayerUdp Udp | TransferLayerTcp Tcp deriving (Data)
 data ApplicationLayer = ApplicationLayerTxt Txt | ApplicationLayerHtml Html deriving (Data)
 
 -- https://mrncciew.com/2014/10/08/802-11-mgmt-beacon-frame/
@@ -58,7 +58,7 @@ data Ip = Ip {
   sourceIpAddr :: Word32,
   destinationIpAddr :: Word32,
   options :: [Word8], -- basicaly whatever is left until we find 0x00 (aka EOL)
-  parent :: LinkLayer
+  parent :: PacketLayer
 } deriving (Data)
 
 -- Source: https://datatracker.ietf.org/doc/html/rfc9293
@@ -74,17 +74,17 @@ data Tcp = Tcp {
   checkSum :: Word16, -- TODO: I can't be bothered to figure this out rn
   urgentPointer :: Word16, -- Only used when URG bit in controlBits is set, points to the the first data that is not urgent.
   options :: Integer, -- Size of (dOffset-5)
-  parent :: NetworkLayer
+  parent :: PacketLayer
 } deriving (Data)
 
 data Udp = Udp {
-  parent :: NetworkLayer
+  parent :: PacketLayer
 } deriving (Data)
 
 data Txt = Txt {
-  parent :: TransferLayer
+  parent :: PacketLayer
 } deriving (Data)
 
 data Html = Html {
-  parent :: TransferLayer
+  parent :: PacketLayer
 } deriving (Data)

@@ -9,9 +9,10 @@ import Data.Text as Text
 
 main :: IO ()
 main = hspec $ do
-  describe "This test shoudl not fail" $ do
-    it "shoud not fail" $ do
+  describe "Sanity test" $ do
+    it "Shoud not fail" $ do
       True `shouldBe` True
+
   describe "Should test packet packer" $ do
     it "Should return if packet has parent and not correctly" $ do
       let eth = Layers.Ethernet [] [] Ethernet.IPv4Packet
@@ -24,8 +25,12 @@ main = hspec $ do
     it "Should " $ do
       let eth = Layers.Ethernet [] [] Ethernet.IPv4Packet
           ethernetLayer = Layers.PacketLinkLayer (Layers.LinkLayerEth eth)
-          ipLayer = Layers.IP 
-          packet = Packet.Packet ethernetLayer
+          ip = Layers.Ip 0 0 0 0 0 0 0 0 0 0 [] ethernetLayer
+          ipLayer = Layers.PacketNetworkLayer (Layers.NetworkLayerIp ip)
+          tcp = Layers.Tcp 0 0 0 0 0 0 0 0 0 0 0 ipLayer
+          tcpLayer = Layers.PacketTransferLayer (Layers.TransferLayerTcp tcp)
+
+          packet = Packet.Packet tcpLayer
           fields = Packet.getFields packet
           recursiveFields = Packet.getRecursiveFields (topLayer packet)
 
