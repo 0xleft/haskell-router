@@ -33,11 +33,14 @@ library
       Router.Layers.Tcp
       Router.Layers.Txt
       Router.Layers.Udp
+      Router.Packer
       Router.Packet
       Router.Parser
+      Router.RouterInfo
       Router.Services.Beacon
       Router.Services.Receiver
       Router.Services.Sender
+      Router.Types
       Router.Util
   other-modules:
       Paths_haskell_router
@@ -54,6 +57,7 @@ library
     , pcap
     , syb
     , text
+    , time
   default-language: Haskell2010
 
 executable haskell-router
@@ -74,6 +78,7 @@ executable haskell-router
     , pcap
     , syb
     , text
+    , time
   default-language: Haskell2010
 
 test-suite haskell-router-test
@@ -95,4 +100,5 @@ test-suite haskell-router-test
     , pcap
     , syb
     , text
+    , time
   default-language: Haskell2010

@@ -25,6 +25,7 @@ dependencies:
 - hspec-discover
 - pcap
 - bytestring
+- time
 - syb
 - text
 
