@@ -7,7 +7,7 @@ module Router.Layers.Ethernet (
 import Data.Word (Word16)
 import Data.Data
 
-data PacketType = IPv6Packet | IPv4Packet deriving (Data, Typeable)
+data PacketType = IPv6Packet | IPv4Packet deriving (Data)
 -- Gives the correct Word16 type for the data packet
 getPacketType :: PacketType -> Word16
 getPacketType IPv6Packet = 35037 -- IPv6 is bit value 88DD Which is 35037 in decimal

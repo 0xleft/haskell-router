@@ -21,4 +21,4 @@ data SSID = SSID {
   elId :: Word8, -- I think in all cases it should be 0b00
   tagLength :: Word8, -- Just the length if the string
   ssidName :: String -- A string with length of tagLength 
-} deriving (Data, Typeable)
+} deriving (Data)
