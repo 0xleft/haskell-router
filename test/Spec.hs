@@ -5,7 +5,7 @@ import Router.Packet as Packet
 import Router.Packer as Packer
 import Foreign (free)
 import Network.Pcap (openLive, sendPacket)
-import Router.Layers.BeaconFrame (getFrameControl, getMacAddress)
+import Router.Layers.BeaconFrame 
 import Router.RouterInfo (macAddress)
 
 main :: IO ()
@@ -21,8 +21,20 @@ main = hspec $ do
 
     it "retern to correct hex repr" $ do
       let s = getMacAddress "e6:cd:ac:8e:0e:35"
-      s `shouldBe` 0xe6cdac8e0e35
+      s `shouldBe` [0xe6, 0xcd, 0xac, 0x8e, 0x0e, 0x35]
       
+    it "Test MACHeader builder" $ do
+      defaultMac <- defaultMacHeader
+      let mac = setMacHeaderBSsid "00:00:00:00:00:08"
+                . setMacHeaderDuration 10
+                . setMacHeaderDestination "ff:ff:ff:ff:ff:ff"
+                . setMacHeaderSeqControl 1 0
+                $ defaultMac
+      (bSsidMacAddress mac) `shouldBe` [0,0,0,0,0,0x08]
+      (destinationMacAddress mac) `shouldBe` [255,255,255,255,255,255]
+      (duration mac) `shouldBe` 10
+      (seqControl mac) `shouldBe` 0x0010
+                
 
 
   describe "Should test packet packer" $ do

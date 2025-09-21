@@ -7,7 +7,12 @@ module Router.Layers.BeaconFrame (
   SupportedRates(..),
   getSupportedRates,
   getFrameControl,
-  getMacAddress
+  getMacAddress,
+  setMacHeaderBSsid,
+  setMacHeaderDestination,
+  setMacHeaderDuration,
+  setMacHeaderSeqControl,
+  defaultMacHeader
 ) where
 
 import Router.Util (intToWord8)
@@ -15,6 +20,7 @@ import Data.Word (Word64,Word16, Word8)
 import Data.Data (Data)
 import Data.Char (ord)
 import Data.Bits
+import Router.RouterInfo (macAddress)
 
 
 
@@ -29,15 +35,13 @@ data MACHeader = MACHeader {
   duration :: Word16, 
 
   -- The following addresses can have different meanig depending on To SD and From SD flag in frameControl option: https://mrncciew.com/2014/09/28/cwap-mac-headeraddresses/
-  sourceMacAddress :: Word64, -- Is actually 6 word 8's because it is a mac address
-  destinationMacAddress :: Word64, -- Is actually 6 word 8's because it is a mac address
-  bSsidMacAddress :: Word64, -- bSsid address should be the same as source when using beacon frame
+  destinationMacAddress :: [Word8], -- Is actually 6 word 8's because it is a mac address
+  sourceMacAddress :: [Word8], -- Is actually 6 word 8's because it is a mac address
+  bSsidMacAddress :: [Word8], -- bSsid address should be the same as source when using beacon frame
 
-  squenceControl :: Word16, -- https://mrncciew.com/2014/11/01/cwap-mac-header-sequence-control/ idk if we need this
+  seqControl :: Word16 -- https://mrncciew.com/2014/11/01/cwap-mac-header-sequence-control/ idk if we need this
   
   -- macAddress4 :: Word64, -- I dont think it matters for beacon frames
-
-  qosControl :: Word16 -- I have no idea what this does
 
   -- htControl :: Word32, -- Probably won't need it since it is only used for 802.11n and 802.11ac  
 } deriving (Data)
@@ -85,7 +89,7 @@ getSupportedRates rates =
                   (map (\r -> (intToWord8 r) .|. 128) rates)
 
 
-
+-- TODO: Make an actual buider for the FramControl
 getFrameControl :: Int -> Int -> Int -> Bool -> Bool -> Bool -> Bool -> Bool -> Bool -> Bool -> Bool -> Word16
 getFrameControl beaconSubtype managementFrame version toDS fromDS fragment retry powerSaving moreData encrypted order =
   let b x = if x then 1 else 0 :: Word16
@@ -109,23 +113,52 @@ charToHex c
   | otherwise = error "Only works from 1-9 and a-f"
   where nOrd = ord c
 
-hexStringToHex :: String -> Word64
+hexStringToHex :: String -> Word8
 hexStringToHex [x,y]
-  = let hex1 = (fromIntegral (charToHex x)) :: Word64
-        hex2 = (fromIntegral (charToHex y)) :: Word64
+  = let hex1 = (fromIntegral (charToHex x)) :: Word8
+        hex2 = (fromIntegral (charToHex y)) :: Word8
         hexTot = (hex1 `shift` 4) .|. hex2
     in hexTot
 hexStringToHex _ = error "Please enter a string of length 2"
 
+defaultMacHeader :: IO MACHeader
+defaultMacHeader = do  
+  s <- macAddress
+  return MACHeader {sourceMacAddress = getMacAddress s,
+                destinationMacAddress = getMacAddress "ff:ff:ff:ff:ff:ff",
+                bSsidMacAddress = getMacAddress s,
+                duration = 0,
+                seqControl = 0,
+                frameControl = 0x8000}
 
-getMacAddress :: String -> Word64
-getMacAddress [] = 0
-getMacAddress (x:y:xs) = getMacAddressHelper xs (hexStringToHex ([x,y]))
+-- Format should be "ff:ff:ff:ff:ff:ff" and returns binary repr
+getMacAddress :: String -> [Word8]
+getMacAddress [] = []
+getMacAddress (x:y:xs) = getMacAddressHelper xs [hexStringToHex ([x,y])]
 getMacAddress _ = error "bad pattern"
 
-getMacAddressHelper :: String -> Word64 -> Word64
+getMacAddressHelper :: String -> [Word8] -> [Word8]
 getMacAddressHelper [] n = n 
 getMacAddressHelper (x:y:z:xs) n  -- x = ':' y = 'f' z = 'f'
-  = getMacAddressHelper xs ((n `shift` 8) .|. hexStringToHex[y,z])
+  = getMacAddressHelper xs (n ++ [hexStringToHex[y,z]])
 getMacAddressHelper _ _= error "bad mac address pattern"
   
+setMacHeaderDestination :: String -> MACHeader -> MACHeader
+setMacHeaderDestination s mac = mac {destinationMacAddress = getMacAddress s}
+
+setMacHeaderSource :: String -> MACHeader -> MACHeader
+setMacHeaderSource s mac = mac {sourceMacAddress = getMacAddress s}
+
+setMacHeaderBSsid :: String -> MACHeader -> MACHeader
+setMacHeaderBSsid s mac = mac {bSsidMacAddress = getMacAddress s}
+
+setMacHeaderDuration :: Int -> MACHeader -> MACHeader
+setMacHeaderDuration dur mac = mac {duration = (fromIntegral dur) :: Word16}
+
+
+setMacHeaderSeqControl :: Int -> Int -> MACHeader -> MACHeader
+setMacHeaderSeqControl seqNum fragNum mac
+  = let seqCtrl = ((fromIntegral seqNum) ::Word16) `shift` 4
+                  .|. ((fromIntegral fragNum) ::Word16)
+    in mac {seqControl = seqCtrl}
+
