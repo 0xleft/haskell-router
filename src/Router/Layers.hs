@@ -70,7 +70,7 @@ data Tcp = Tcp {
   window :: Word32, -- Normally it is 16 Word, but RFC recommends it is 32 bit. It is the number of octets we can accept
   checkSum :: Word16, -- TODO: I can't be bothered to figure this out rn
   urgentPointer :: Word16, -- Only used when URG bit in controlBits is set, points to the the first data that is not urgent.
-  options :: Integer, -- Size of (dOffset-5)                  -- TODO can we change it to use some type of Word8 or [Word8]?
+  options :: [Word8], -- Size of (dOffset-5)                  -- TODO can we change it to use some type of Word8 or [Word8]?
   parent :: PacketLayer
 } deriving (Data)
 
