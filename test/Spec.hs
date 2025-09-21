@@ -4,6 +4,7 @@ import Router.Layers as Layers
 import Router.Packet as Packet
 import Router.Packer as Packer
 import Foreign (free)
+import Network.Pcap (openLive, sendPacket)
 
 main :: IO ()
 main = hspec $ do
