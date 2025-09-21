@@ -18,7 +18,8 @@ module Router.Layers.BeaconFrame (
   setFrameBodyCapabilityInfo,
   setFrameBodySSID,
   setFrameBodyTimeStamp,
-  setFrameBodySupportedRates
+  setFrameBodySupportedRates,
+  setMacHeaderSource
 ) where
 
 import Router.Util (intToWord8)
@@ -28,23 +29,16 @@ import Data.Char (ord)
 import Data.Bits
 import Router.RouterInfo (macAddress)
 
-
-
-
 -- Source: https://tbhaxor.com/mac-header-format-in-detail/
 data MACHeader = MACHeader {
   frameControl :: Word16, -- A lot of information about frame: https://tbhaxor.com/mac-header-format-in-detail/
   duration :: Word16, 
-
   -- The following addresses can have different meanig depending on To SD and From SD flag in frameControl option: https://mrncciew.com/2014/09/28/cwap-mac-headeraddresses/
   destinationMacAddress :: [Word8], -- Is actually 6 word 8's because it is a mac address
   sourceMacAddress :: [Word8], -- Is actually 6 word 8's because it is a mac address
   bSsidMacAddress :: [Word8], -- bSsid address should be the same as source when using beacon frame
-
   seqControl :: Word16 -- https://mrncciew.com/2014/11/01/cwap-mac-header-sequence-control/ idk if we need this
-  
   -- macAddress4 :: Word64, -- I dont think it matters for beacon frames
-
   -- htControl :: Word32, -- Probably won't need it since it is only used for 802.11n and 802.11ac  
 } deriving (Data)
 
@@ -105,7 +99,6 @@ setFrameBodySSID name body = body {ssid = (getSSID name)}
 setFrameBodySupportedRates :: [Int] -> BeaconFrameBody-> BeaconFrameBody
 setFrameBodySupportedRates xs body = body {supportedRates = getSupportedRates xs}
 
-
 defaultFrameBody :: BeaconFrameBody
 defaultFrameBody = 
   BeaconFrameBody  {timeStamp = 0,
@@ -114,12 +107,11 @@ defaultFrameBody =
                     ssid = getSSID "Awesome Network",
                     supportedRates = defaultSupportedRates}
 
-
 -- TODO: Make an actual buider for the FramControl
 getFrameControl :: Int -> Int -> Int -> Bool -> Bool -> Bool -> Bool -> Bool -> Bool -> Bool -> Bool -> Word16
 getFrameControl beaconSubtype managementFrame version toDS fromDS fragment retry powerSaving moreData encrypted order =
   let b x = if x then 1 else 0 :: Word16
-      fc =    (fromIntegral beaconSubtype)  `shiftL` 12  
+      fc =     (fromIntegral beaconSubtype)  `shiftL` 12  
            .|. (fromIntegral managementFrame)  `shiftL` 10  
            .|. (fromIntegral version)  `shiftL` 8  
            .|. b toDS         `shiftL` 7
@@ -180,7 +172,6 @@ setMacHeaderBSsid s mac = mac {bSsidMacAddress = getMacAddress s}
 
 setMacHeaderDuration :: Int -> MACHeader -> MACHeader
 setMacHeaderDuration dur mac = mac {duration = (fromIntegral dur) :: Word16}
-
 
 setMacHeaderSeqControl :: Int -> Int -> MACHeader -> MACHeader
 setMacHeaderSeqControl seqNum fragNum mac

@@ -5,16 +5,22 @@ module Router.Services.Beacon (
 import Control.Concurrent ( threadDelay )
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Router.Layers (BeaconFrame (..), BeaconFrameBody)
-import Router.Layers.BeaconFrame (MACHeader (MACHeader), defaultMacHeader, defaultFrameBody, setFrameBodyTimeStamp, setMacHeaderDuration, setMacHeaderSeqControl)
+import Router.Layers.BeaconFrame (MACHeader (..), defaultMacHeader, defaultFrameBody, setFrameBodyTimeStamp, setMacHeaderSeqControl)
+import qualified Router.Packer as Packer
+import qualified Router.Layers as Layers
+import qualified Router.Packet as Packet
+import Network.Pcap (openLive, sendPacket, PcapHandle(..))
+import Foreign (free)
 
 start :: IO ()
 start = do
   defaultMac <- defaultMacHeader
-  beaconLoop 1024 defaultFrameBody defaultMac 0
+  interface <- openLive "wlo1" 65535 False 0 -- todo replace the interface to get from command line
+  beaconLoop 1024 interface defaultFrameBody defaultMac 0
   return ()
 
-beaconLoop :: Int -> BeaconFrameBody -> MACHeader -> Int -> IO ()
-beaconLoop delay frameBody macHeader seqNum = do
+beaconLoop :: Int -> PcapHandle -> BeaconFrameBody -> MACHeader -> Int -> IO ()
+beaconLoop delay interface frameBody macHeader seqNum = do
   threadDelay delay
 
   curTime <- (round . (* 1000000)) <$> getPOSIXTime
@@ -24,11 +30,16 @@ beaconLoop delay frameBody macHeader seqNum = do
                             $ frameBody
       curMacHeader = setMacHeaderSeqControl seqNum 0
                       $ macHeader
-      curBeaconFrame = BeaconFrame {macHeader=curMacHeader,
-                                    beaconFrameBody=curBeaconFrameBody}
-  
+      bF = BeaconFrame curMacHeader frameBody
+      beaconFrame = Layers.PacketLinkLayer (Layers.LinkLayerBeaconFrame bF)
+      beaconFramePacket = Packet.Packet beaconFrame
 
-  beaconLoop delay curBeaconFrameBody curMacHeader (succ seqNum)
+  -- (ptr, len, ws) <- Packer.pack beaconFramePacket
+  -- sendPacket interface ptr len
+-- 
+  -- free ptr
+
+  beaconLoop delay interface curBeaconFrameBody curMacHeader (succ seqNum)
   return ()
 
 
