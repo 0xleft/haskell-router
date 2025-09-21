@@ -20,7 +20,7 @@ main = hspec $ do
       (Packer.hasField "notexistantfield" ethernetLayer) `shouldBe` False
     
     it "Should " $ do -- todo actualy finish this test
-      let eth = Layers.Ethernet [0] [0] Ethernet.IPv4Packet
+      let eth = Layers.Ethernet [0, 0, 0, 0, 0, 0] [0, 0, 0, 0, 0, 0] Ethernet.IPv4Packet
           ethernetLayer = Layers.PacketLinkLayer (Layers.LinkLayerEth eth)
           ip = Layers.Ip 0 0 0 0 0 0 0 0 0 0 [] ethernetLayer
           ipLayer = Layers.PacketNetworkLayer (Layers.NetworkLayerIp ip)

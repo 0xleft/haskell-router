@@ -27,9 +27,11 @@ main = do
       tcpLayer = Layers.PacketTransferLayer (Layers.TransferLayerTcp tcp)
       packet = Packet.Packet tcpLayer
 
-  (ptr, len) <- Packer.pack packet
+  (ptr, len, ws) <- Packer.pack packet
 
-  interface <- openLive "lo" 65535 False 0
+  putStrLn $ show ws
+
+  interface <- openLive "wlo1" 65535 False 0
   sendPacket interface ptr len
 
   free ptr

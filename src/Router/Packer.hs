@@ -47,8 +47,8 @@ convertField :: (String, Dynamic) -> [Word8]
 convertField (name, d)
   | Just w <- fromDynamic d :: Maybe Word8 = [w]
   | Just w <- fromDynamic d :: Maybe Word16 = [fromIntegral (w `shiftR` 8), fromIntegral w]
-  | Just w <- fromDynamic d :: Maybe Word32 = [ fromIntegral (w `shiftR` 24), fromIntegral (w `shiftR` 16), fromIntegral (w `shiftR` 8), fromIntegral w]
-  | Just w <- fromDynamic d :: Maybe Word64 = [ fromIntegral (w `shiftR` 56), fromIntegral (w `shiftR` 48), fromIntegral (w `shiftR` 40), fromIntegral (w `shiftR` 32), fromIntegral (w `shiftR` 24), fromIntegral (w `shiftR` 16), fromIntegral (w `shiftR` 8), fromIntegral w ]
+  | Just w <- fromDynamic d :: Maybe Word32 = [fromIntegral (w `shiftR` 24), fromIntegral (w `shiftR` 16), fromIntegral (w `shiftR` 8), fromIntegral w]
+  | Just w <- fromDynamic d :: Maybe Word64 = [fromIntegral (w `shiftR` 56), fromIntegral (w `shiftR` 48), fromIntegral (w `shiftR` 40), fromIntegral (w `shiftR` 32), fromIntegral (w `shiftR` 24), fromIntegral (w `shiftR` 16), fromIntegral (w `shiftR` 8), fromIntegral w]
   | Just listW8 <- fromDynamic d :: Maybe [Word8] = listW8
   | Just listW16 <- fromDynamic d :: Maybe [Word16] = concatMap (\w -> convertField ("", toDyn w)) listW16
   | Just listW32 <- fromDynamic d :: Maybe [Word32] = concatMap (\w -> convertField ("", toDyn w)) listW32
@@ -63,7 +63,7 @@ convertField (name, d)
 
   -- end of ugly
   | Just string <- fromDynamic d :: Maybe String = map (fromIntegral . fromEnum) string
-  | otherwise = [0]
+  | otherwise = map (fromIntegral . fromEnum) name
 
 convertFields :: [(String, Dynamic)] -> [Word8]
 convertFields fields = concatMap convertField fields
@@ -71,8 +71,8 @@ convertFields fields = concatMap convertField fields
 convertData :: Data a => a -> [Word8]
 convertData x = convertFields $ getRecursiveFields x
 
-pack :: Packet -> IO (Ptr Word8, Int) -- must free the array afterwards
+pack :: Packet -> IO (Ptr Word8, Int, [Word8]) -- must free the array afterwards
 pack p = do
   let ws = convertData $ topLayer p
   ptr <- newArray ws
-  return (ptr, length ws)
+  return (ptr, length ws, ws)
