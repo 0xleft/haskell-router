@@ -26,7 +26,7 @@ main = hspec $ do
           ethernetLayer = Layers.PacketLinkLayer (Layers.LinkLayerEth eth)
           ip = Layers.Ip 0x45 0 0 0 0 0 0 0 0 0 [] ethernetLayer
           ipLayer = Layers.PacketNetworkLayer (Layers.NetworkLayerIp ip)
-          tcp = Layers.Tcp 0 0 0 0 0 0 0 0 0 0 0 ipLayer
+          tcp = Layers.Tcp 0 0 0 0 0 0 0 0 0 0 [] ipLayer
           tcpLayer = Layers.PacketTransferLayer (Layers.TransferLayerTcp tcp)
 
           packet = Packet.Packet tcpLayer
