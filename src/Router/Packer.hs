@@ -12,6 +12,7 @@ import Router.Layers.BeaconFrame (SSID(..), BeaconFrameBody(..), MACHeader(..), 
 import Router.Layers.Ethernet (PacketType(..), getPacketType)
 import Router.Packet (Packet(..))
 import qualified Data.ByteString.Char8 as B
+import qualified Data.ByteString.Base16 as B16
 import Data.Dynamic (Dynamic, toDyn, fromDynamic)
 import Router.Layers (PacketLayer(..))
 import Data.Word (Word64, Word32, Word16, Word8)
@@ -71,4 +72,4 @@ convertData :: Data a => a -> String
 convertData x = concat $ convertFields $ getRecursiveFields x
 
 pack :: Packet -> B.ByteString
-pack p = B.pack $ convertData $ topLayer p 
+pack p = B16.encode $ B.pack $ convertData $ topLayer p
