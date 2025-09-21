@@ -4,12 +4,24 @@ module Router.Layers.BeaconFrame (
   SSID(..),
   MACHeader(..),
   BeaconFrameBody(..),
-  SupportedRates(..)
+  SupportedRates(..),
+  getSupportedRates,
+  getFrameControl,
+  getMacAddress
 ) where
 
 import Router.Util (intToWord8)
 import Data.Word (Word64,Word16, Word8)
 import Data.Data (Data)
+import Data.Char (ord)
+import Data.Bits
+
+
+
+data BeaconFrame = BeaconFrame {
+  macHeader :: MACHeader,
+  beaconFrameBody :: BeaconFrameBody
+} deriving (Data)
 
 -- Source: https://tbhaxor.com/mac-header-format-in-detail/
 data MACHeader = MACHeader {
@@ -63,3 +75,57 @@ data SupportedRates = SupportedRates {
 
 getDefaultSupportedRates :: SupportedRates
 getDefaultSupportedRates = SupportedRates 0 0 [] -- TODO: MAKE THESE VALUES MAKE SENSE
+
+-- Rates is in Int * 500Kbps, thus 12 = (12 * 500kbps) = 6 Mbps
+-- 7th bit is flipped on by default to set it to basic rate, intead of supported rate
+getSupportedRates :: [Int] -> SupportedRates
+getSupportedRates rates = 
+  SupportedRates  (0)
+                  (intToWord8 (length rates)) 
+                  (map (\r -> (intToWord8 r) .|. 128) rates)
+
+
+
+getFrameControl :: Int -> Int -> Int -> Bool -> Bool -> Bool -> Bool -> Bool -> Bool -> Bool -> Bool -> Word16
+getFrameControl beaconSubtype managementFrame version toDS fromDS fragment retry powerSaving moreData encrypted order =
+  let b x = if x then 1 else 0 :: Word16
+      fc =    (fromIntegral beaconSubtype)  `shiftL` 12  
+           .|. (fromIntegral managementFrame)  `shiftL` 10  
+           .|. (fromIntegral version)  `shiftL` 8  
+           .|. b toDS         `shiftL` 7
+           .|. b fromDS       `shiftL` 6
+           .|. b fragment     `shiftL` 5
+           .|. b retry        `shiftL` 4
+           .|. b powerSaving  `shiftL` 3
+           .|. b moreData     `shiftL` 2
+           .|. b encrypted    `shiftL` 1
+           .|. b order        `shiftL` 0
+  in fc
+
+charToHex :: Char -> Int
+charToHex c
+  | nOrd >= 48 && nOrd <= 57 = nOrd - 48 -- 1 through 9
+  | nOrd >= 97 && nOrd <= 102 = nOrd - 97 + 10  -- a through f
+  | otherwise = error "Only works from 1-9 and a-f"
+  where nOrd = ord c
+
+hexStringToHex :: String -> Word64
+hexStringToHex [x,y]
+  = let hex1 = (fromIntegral (charToHex x)) :: Word64
+        hex2 = (fromIntegral (charToHex y)) :: Word64
+        hexTot = (hex1 `shift` 4) .|. hex2
+    in hexTot
+hexStringToHex _ = error "Please enter a string of length 2"
+
+
+getMacAddress :: String -> Word64
+getMacAddress [] = 0
+getMacAddress (x:y:xs) = getMacAddressHelper xs (hexStringToHex ([x,y]))
+getMacAddress _ = error "bad pattern"
+
+getMacAddressHelper :: String -> Word64 -> Word64
+getMacAddressHelper [] n = n 
+getMacAddressHelper (x:y:z:xs) n  -- x = ':' y = 'f' z = 'f'
+  = getMacAddressHelper xs ((n `shift` 8) .|. hexStringToHex[y,z])
+getMacAddressHelper _ _= error "bad mac address pattern"
+  

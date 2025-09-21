@@ -5,12 +5,25 @@ import Router.Packet as Packet
 import Router.Packer as Packer
 import Foreign (free)
 import Network.Pcap (openLive, sendPacket)
+import Router.Layers.BeaconFrame (getFrameControl, getMacAddress)
+import Router.RouterInfo (macAddress)
 
 main :: IO ()
 main = hspec $ do
   describe "Sanity test" $ do
     it "Shoud not fail" $ do
       True `shouldBe` True
+
+  describe "BeaconFrame converters" $ do
+    it "return the correct Word16 representation for beacon frame" $ do
+      let fc = getFrameControl 8 0 0 False False False False False False False False
+      fc `shouldBe` 0x8000
+
+    it "retern to correct hex repr" $ do
+      let s = getMacAddress "e6:cd:ac:8e:0e:35"
+      s `shouldBe` 0xe6cdac8e0e35
+      
+
 
   describe "Should test packet packer" $ do
     it "Should return if packet has parent and not correctly" $ do

@@ -4,6 +4,7 @@ module Router.Services.Beacon (
 
 import Control.Concurrent ( threadDelay )
 import Data.Time.Clock.POSIX (getPOSIXTime)
+import Router.Layers (BeaconFrame)
 
 start :: IO ()
 start = 
@@ -20,3 +21,8 @@ beaconLoop delay = do
 
   beaconLoop delay 
   return ()
+
+
+-- createBeacon :: IO String -> IO Integer -> BeaconFrame
+-- createBeacon time idkYet =
+  -- let macHeader = MACHeader ()
