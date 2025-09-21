@@ -11,7 +11,6 @@ module Router.Packer (
 import Router.Layers.BeaconFrame (SSID(..), BeaconFrameBody(..), MACHeader(..), SupportedRates(..))
 import Router.Layers.Ethernet (PacketType(..), getPacketType)
 import Router.Packet (Packet(..))
-import qualified Data.ByteString.Char8 as B
 import Data.Dynamic (Dynamic, toDyn, fromDynamic)
 import Router.Layers (PacketLayer(..))
 import Data.Word (Word64, Word32, Word16, Word8)
