@@ -5,12 +5,12 @@ import Router.Services.Beacon as Beacon ( start )
 import Router.Services.Receiver as Receiver ( start )
 import Router.Services.Sender as Sender ( start )
 import Control.Concurrent (forkIO)
-import Network.Pcap (openLive, sendPacketBS)
+import Network.Pcap (openLive, sendPacket)
 import qualified Router.Packer as Packer
 import qualified Router.Packet as Packet
 import qualified Router.Layers as Layers
 import qualified Router.Layers.Ethernet as Ethernet
-import qualified Data.ByteString.Char8 as B
+import Foreign (free)
 
 -- main thread will be processing one packet at the time from the queue
 -- a thread will be listening for packets and adding them to the queue
@@ -27,8 +27,12 @@ main = do
       tcpLayer = Layers.PacketTransferLayer (Layers.TransferLayerTcp tcp)
       packet = Packet.Packet tcpLayer
 
+  (ptr, len) <- Packer.pack packet
+
   interface <- openLive "lo" 65535 False 0
-  sendPacketBS interface (B.pack "\NUL\NUL\NUL\NUL\NUL\NUL\NUL\NUL\NUL\NUL\NUL\NUL\255\255Hello, World!")
+  sendPacket interface ptr len
+
+  free ptr
 
   _ <- forkIO $ Beacon.start -- thread
   _ <- forkIO $ Receiver.start pq  -- thread

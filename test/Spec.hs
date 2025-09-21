@@ -1,20 +1,8 @@
-import Test.Hspec
-
+import Test.Hspec ( hspec, describe, it, shouldBe )
 import Router.Layers.Ethernet as Ethernet
-    ( PacketType(IPv4Packet) )
 import Router.Layers as Layers
-    ( Ethernet(Ethernet),
-      Ip(Ip),
-      LinkLayer(LinkLayerEth),
-      NetworkLayer(NetworkLayerIp),
-      PacketLayer(PacketTransferLayer, PacketLinkLayer,
-                  PacketNetworkLayer),
-      Tcp(Tcp),
-      TransferLayer(TransferLayerTcp) )
-import Router.Packet as Packet ( Packet(topLayer, Packet) )
+import Router.Packet as Packet
 import Router.Packer as Packer
-    ( convertFields, getFields, getRecursiveFields, hasField, pack )
-import Network.Pcap (openLive, loopBS, sendPacketBS)
 
 main :: IO ()
 main = hspec $ do
@@ -46,6 +34,6 @@ main = hspec $ do
           recursiveFields = Packer.getRecursiveFields (topLayer packet)
           convertedFields = Packer.convertFields recursiveFields 
 
-      _ <- putStrLn (Prelude.show $ Packer.pack packet)
+      _ <- putStrLn (Prelude.show convertedFields)
       -- _ <- putStrLn (Prelude.show fields)
       True `shouldBe` True

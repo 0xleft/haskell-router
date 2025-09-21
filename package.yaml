@@ -28,7 +28,6 @@ dependencies:
 - time
 - syb
 - text
-- base16-bytestring
 
 ghc-options:
 - -Wall
