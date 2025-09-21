@@ -1,9 +1,9 @@
 module Main (main) where
 
-import Router.Packet (Packet(..), PacketQueue(..))
-import Router.Services.Beacon as Beacon
-import Router.Services.Receiver as Receiver
-import Router.Services.Sender as Sender
+import Router.Packet (PacketQueue(..))
+import Router.Services.Beacon as Beacon ( start )
+import Router.Services.Receiver as Receiver ( start )
+import Router.Services.Sender as Sender ( start )
 import Control.Concurrent (forkIO)
 
 -- main thread will be processing one packet at the time from the queue
@@ -11,8 +11,7 @@ import Control.Concurrent (forkIO)
 
 main :: IO ()
 main = do
-  let pq = PacketQueue { maxLength = 1000, packets = [] }
-  -- todo replace with MVar
+  let pq = PacketQueue { maxLength = 1000, packets = [] } -- todo replace with MVar
 
   _ <- forkIO $ Beacon.start -- thread
   _ <- forkIO $ Receiver.start pq  -- thread

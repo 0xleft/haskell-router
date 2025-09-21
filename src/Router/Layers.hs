@@ -1,9 +1,15 @@
-{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE DuplicateRecordFields, DeriveDataTypeable #-}
 
 module Router.Layers (
   PacketLayer(..),
 
+  LinkLayer(..),
+  NetworkLayer(..),
+  TransferLayer(..),
+  ApplicationLayer(..),
+
   BeaconFrame(..),
+  BeaconFrameBody(..),
   Ethernet(..),
   Ip(..),
   Tcp(..),
@@ -12,36 +18,33 @@ module Router.Layers (
   Html(..)
 ) where
 
-import Data.Word (Word64, Word32, Word16, Word8)
-import Router.Layers.BeaconFrame (SSID(..))
+import Data.Word (Word32, Word16, Word8)
+import Router.Layers.BeaconFrame (MACHeader(..), BeaconFrameBody(..))
 import Router.Layers.Ethernet (PacketType(..))
+import Data.Data
 
 -- generic catch all case for layers
-data PacketLayer = PacketLinkLayer LinkLayer | PacketNetworkLayer NetworkLayer | PacketTransferLayer TransferLayer | PacketApplicationLayer ApplicationLayer
+data PacketLayer = PacketLinkLayer LinkLayer | PacketNetworkLayer NetworkLayer | PacketTransferLayer TransferLayer | PacketApplicationLayer ApplicationLayer deriving (Data)
 
-data LinkLayer = LinkLayerEth Ethernet | LinkLayerBeaconFrame BeaconFrame
-data NetworkLayer = NetworkLayerIP Ip
-data TransferLayer = TransferLayerUDP Udp | TransferLayerTCP Tcp
-data ApplicationLayer = ApplicationLayerTxt Txt | ApplicationLayerHtml Html
+data LinkLayer = LinkLayerEth Ethernet | LinkLayerBeaconFrame BeaconFrame deriving (Data)
+data NetworkLayer = NetworkLayerIp Ip deriving (Data)
+data TransferLayer = TransferLayerUdp Udp | TransferLayerTcp Tcp deriving (Data)
+data ApplicationLayer = ApplicationLayerTxt Txt | ApplicationLayerHtml Html deriving (Data)
 
--- https://mrncciew.com/2014/10/08/802-11-mgmt-beacon-frame/
--- WireShark capture of BeaconFrame: https://documentation.meraki.com/MR/Wireless_Troubleshooting/Analyzing_Wireless_Packet_Captures
-data BeaconFrame = BeaconFrame { 
-  timeStamp :: Word64, -- Time in microseconds since the access point has been active
-  beaconInterval :: Word16, -- Time in TU (1 TU = 1024 microseconds) ; default = 100 TU (102.4 milliseconds)
-  capableInformation :: Word16, -- Advertised capabilities of network
-  ssid :: SSID
-}
+data BeaconFrame = BeaconFrame {
+  macHeader :: MACHeader,
+  beaconFrameBody :: BeaconFrameBody
+} deriving (Data)
 
 data Ethernet = Ethernet {
   destinationMac :: [Word8], -- of length 6!
   sourceMac :: [Word8], -- also of length 6
   packetType :: PacketType
-}
+} deriving (Data)
 
 -- https://www.geeksforgeeks.org/computer-networks/tcp-ip-packet-format/ and also the wireshark file
 data Ip = Ip {
-  versionAndHeaderLenth :: Word8, -- ugly but we dont have Word4 type :(
+  versionAndHeaderLength :: Word8, -- ugly but we dont have Word4 type :(
   typeOfService :: Word8,
   totalLength :: Word16,
   identification :: Word16,
@@ -52,8 +55,8 @@ data Ip = Ip {
   sourceIpAddr :: Word32,
   destinationIpAddr :: Word32,
   options :: [Word8], -- basicaly whatever is left until we find 0x00 (aka EOL)
-  parent :: LinkLayer
-}
+  parent :: PacketLayer
+} deriving (Data)
 
 -- Source: https://datatracker.ietf.org/doc/html/rfc9293
 data Tcp = Tcp {
@@ -67,18 +70,18 @@ data Tcp = Tcp {
   window :: Word32, -- Normally it is 16 Word, but RFC recommends it is 32 bit. It is the number of octets we can accept
   checkSum :: Word16, -- TODO: I can't be bothered to figure this out rn
   urgentPointer :: Word16, -- Only used when URG bit in controlBits is set, points to the the first data that is not urgent.
-  options :: Integer, -- Size of (dOffset-5)
-  parent :: NetworkLayer
-}
+  options :: Integer, -- Size of (dOffset-5)                  -- TODO can we change it to use some type of Word8 or [Word8]?
+  parent :: PacketLayer
+} deriving (Data)
 
 data Udp = Udp {
-  parent :: NetworkLayer
-}
+  parent :: PacketLayer
+} deriving (Data)
 
 data Txt = Txt {
-  parent :: TransferLayer
-}
+  parent :: PacketLayer
+} deriving (Data)
 
 data Html = Html {
-  parent :: TransferLayer
-}
+  parent :: PacketLayer
+} deriving (Data)

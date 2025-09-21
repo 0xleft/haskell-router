@@ -1,14 +1,16 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Router.Packet (
   Packet(..),
-  PacketQueue(..)
+  PacketQueue(..),
 ) where
 
+import Data.Data (Data, Typeable)
 import Router.Layers (PacketLayer(..))
-import Data.Word (Word32, Word16, Word8)
 
 data Packet = Packet {
   topLayer :: PacketLayer
-}
+} deriving (Data, Typeable)
 
 data PacketQueue = PacketQueue {
   maxLength :: Int,
