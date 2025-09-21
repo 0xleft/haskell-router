@@ -11,13 +11,12 @@ module Router.Packer (
 import Router.Layers.BeaconFrame (SSID(..), BeaconFrameBody(..), MACHeader(..), SupportedRates(..))
 import Router.Layers.Ethernet (PacketType(..), getPacketType)
 import Router.Packet (Packet(..))
+import qualified Data.ByteString as B
 import Data.Dynamic (Dynamic, toDyn, fromDynamic)
 import Router.Layers (PacketLayer(..))
 import Data.Word (Word64, Word32, Word16, Word8)
 import Data.Maybe (listToMaybe)
 import Data.Data (Data, gmapQ, gmapQi, toConstr, constrFields)
-import Foreign (Ptr)
-import Foreign.Marshal.Array (newArray)
 import Data.Bits (shiftR)
 
 getFields :: Data a => a -> [(String, Dynamic)]
@@ -70,8 +69,5 @@ convertFields fields = concatMap convertField fields
 convertData :: Data a => a -> [Word8]
 convertData x = convertFields $ getRecursiveFields x
 
-pack :: Packet -> IO (Ptr Word8, Int, [Word8]) -- must free the array afterwards
-pack p = do
-  let ws = convertData $ topLayer p
-  ptr <- newArray ws
-  return (ptr, length ws, ws)
+pack :: Packet -> B.ByteString
+pack p = B.pack (convertData $ topLayer p)
