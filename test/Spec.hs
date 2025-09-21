@@ -1,11 +1,20 @@
 import Test.Hspec
 
 import Router.Layers.Ethernet as Ethernet
+    ( PacketType(IPv4Packet) )
 import Router.Layers as Layers
-import Router.Packet as Packet
+    ( Ethernet(Ethernet),
+      Ip(Ip),
+      LinkLayer(LinkLayerEth),
+      NetworkLayer(NetworkLayerIp),
+      PacketLayer(PacketTransferLayer, PacketLinkLayer,
+                  PacketNetworkLayer),
+      Tcp(Tcp),
+      TransferLayer(TransferLayerTcp) )
+import Router.Packet as Packet ( Packet(topLayer, Packet) )
 import Router.Packer as Packer
-import Data.Generics
-import Data.Text as Text
+    ( convertFields, getFields, getRecursiveFields, hasField, pack )
+import Network.Pcap (openLive, loopBS, sendPacketBS)
 
 main :: IO ()
 main = hspec $ do
@@ -29,6 +38,8 @@ main = hspec $ do
           ipLayer = Layers.PacketNetworkLayer (Layers.NetworkLayerIp ip)
           tcp = Layers.Tcp 0 0 0 0 0 0 0 0 0 0 0 ipLayer
           tcpLayer = Layers.PacketTransferLayer (Layers.TransferLayerTcp tcp)
+
+          
 
           packet = Packet.Packet tcpLayer
           fields = Packer.getFields packet

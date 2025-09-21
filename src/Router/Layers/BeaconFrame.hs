@@ -10,7 +10,6 @@ module Router.Layers.BeaconFrame (
 import Router.Util (intToWord8)
 import Data.Word (Word64,Word16, Word8)
 import Data.Data (Data)
-import qualified Data.ByteString.Char8 as B
 
 -- Source: https://tbhaxor.com/mac-header-format-in-detail/
 data MACHeader = MACHeader {

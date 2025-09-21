@@ -2,9 +2,8 @@ module Router.Services.Beacon (
   start
 ) where
 
-import Control.Concurrent
+import Control.Concurrent ( threadDelay )
 import Data.Time.Clock.POSIX (getPOSIXTime)
-import Router.RouterInfo (macAddress)
 
 start :: IO ()
 start = 

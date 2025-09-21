@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable, ExistentialQuantification #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 
 module Router.Packer (
   hasField,
@@ -17,7 +17,7 @@ import Router.Layers (PacketLayer(..))
 import Data.Word (Word64, Word32, Word16, Word8)
 import Data.Maybe (listToMaybe)
 import Text.Printf (printf)
-import Data.Data (Data, gmapQ, gmapQi, Typeable, toConstr, constrFields)
+import Data.Data (Data, gmapQ, gmapQi, toConstr, constrFields)
 
 getFields :: Data a => a -> [(String, Dynamic)]
 getFields x =
@@ -49,8 +49,8 @@ convertField (name, d)
   | Just w64 <- fromDynamic d :: Maybe Word64 = printf "%016X" w64
   | Just listW8 <- fromDynamic d :: Maybe [Word8] = concat (map (\x -> printf "%02X" x) listW8)
   | Just listW16 <- fromDynamic d :: Maybe [Word16] = concat (map (\x ->  printf "%04X" x) listW16)
-  | Just listW32 <- fromDynamic d :: Maybe [Word16] = concat (map (\x ->  printf "%08X" x) listW32)
-  | Just listW64 <- fromDynamic d :: Maybe [Word16] = concat (map (\x ->  printf "%016X" x) listW64)
+  | Just listW32 <- fromDynamic d :: Maybe [Word32] = concat (map (\x ->  printf "%08X" x) listW32)
+  | Just listW64 <- fromDynamic d :: Maybe [Word64] = concat (map (\x ->  printf "%016X" x) listW64)
 
   -- here comes the ugly
   | Just ssid <- fromDynamic d :: Maybe SSID = convertData ssid
@@ -62,7 +62,7 @@ convertField (name, d)
   -- end of ugly
   | Just int <- fromDynamic d :: Maybe Integer = printf "%X" int -- TODO change this?
   | Just string <- fromDynamic d :: Maybe String = string
-  | otherwise = error "You need to implement conversion from the data type you made to String of hexadecimal. Look at Router.Packer::convertField"
+  | otherwise = error "You need to implement conversion from the data type you made to String of hexadecimal. Non implemented field: " ++ name
 
 convertFields :: [(String, Dynamic)] -> [String]
 convertFields fields = map convertField fields

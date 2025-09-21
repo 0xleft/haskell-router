@@ -6,8 +6,7 @@ module Router.Layers.Ethernet (
 ) where 
 
 import Data.Word (Word16)
-import Data.Data
-import qualified Data.ByteString.Char8 as B
+import Data.Data ( Data )
 
 data PacketType = IPv6Packet | IPv4Packet deriving (Data)
 -- Gives the correct Word16 type for the data packet

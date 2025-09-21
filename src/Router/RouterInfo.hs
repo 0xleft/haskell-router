@@ -2,8 +2,6 @@ module Router.RouterInfo (
   macAddress
 ) where
 
-import System.IO
-
 networkDevice :: String
 networkDevice = "lo"
 

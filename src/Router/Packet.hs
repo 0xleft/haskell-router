@@ -9,20 +9,14 @@ module Router.Packet (
   getRecursiveFields
 ) where
 
-import qualified Data.ByteString.Char8 as B
-
 import Data.Data (Data, gmapQ, gmapQi, Typeable, toConstr, constrFields)
 import Data.Dynamic (Dynamic, toDyn, fromDynamic)
 import Router.Layers (PacketLayer(..))
-import Data.Word (Word32, Word16, Word8)
 import Data.Maybe (listToMaybe)
 
 data Packet = Packet {
   topLayer :: PacketLayer
 } deriving (Data, Typeable)
-
-class PacketPacker p where
-  pack :: p -> B.ByteString
 
 getFields :: Data a => a -> [(String, Dynamic)]
 getFields x =
@@ -44,11 +38,6 @@ getRecursiveFields x = case (hasField "parent" x) of
                                 )
             Nothing -> []
   False -> getFields x
-
-instance PacketPacker Packet where
-  pack p = case (hasField "parent" (topLayer p)) of
-    True -> B.pack ""
-    False -> B.pack ""
 
 data PacketQueue = PacketQueue {
   maxLength :: Int,

@@ -18,8 +18,8 @@ module Router.Layers (
   Html(..)
 ) where
 
-import Data.Word (Word64, Word32, Word16, Word8)
-import Router.Layers.BeaconFrame (SSID(..), MACHeader(..), BeaconFrameBody(..))
+import Data.Word (Word32, Word16, Word8)
+import Router.Layers.BeaconFrame (MACHeader(..), BeaconFrameBody(..))
 import Router.Layers.Ethernet (PacketType(..))
 import Data.Data
 
