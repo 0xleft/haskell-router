@@ -4,22 +4,31 @@ module Router.Services.Beacon (
 
 import Control.Concurrent ( threadDelay )
 import Data.Time.Clock.POSIX (getPOSIXTime)
-import Router.Layers (BeaconFrame)
+import Router.Layers (BeaconFrame (..), BeaconFrameBody)
+import Router.Layers.BeaconFrame (MACHeader (MACHeader), defaultMacHeader, defaultFrameBody, setFrameBodyTimeStamp, setMacHeaderDuration, setMacHeaderSeqControl)
 
 start :: IO ()
-start = 
-  do
-  beaconLoop 1024
+start = do
+  defaultMac <- defaultMacHeader
+  beaconLoop 1024 defaultFrameBody defaultMac 0
   return ()
 
-beaconLoop :: Int -> IO ()
-beaconLoop delay = do
+beaconLoop :: Int -> BeaconFrameBody -> MACHeader -> Int -> IO ()
+beaconLoop delay frameBody macHeader seqNum = do
   threadDelay delay
 
-  -- TODO: create a beacon frame using the current time
-  let curTime = (round . (* 1000000)) <$> getPOSIXTime
+  curTime <- (round . (* 1000000)) <$> getPOSIXTime
 
-  beaconLoop delay 
+  -- TODO: create a beacon frame using the current time
+  let curBeaconFrameBody = setFrameBodyTimeStamp curTime
+                            $ frameBody
+      curMacHeader = setMacHeaderSeqControl seqNum 0
+                      $ macHeader
+      curBeaconFrame = BeaconFrame {macHeader=curMacHeader,
+                                    beaconFrameBody=curBeaconFrameBody}
+  
+
+  beaconLoop delay curBeaconFrameBody curMacHeader (succ seqNum)
   return ()
 
 

@@ -30,10 +30,6 @@ import Router.RouterInfo (macAddress)
 
 
 
-data BeaconFrame = BeaconFrame {
-  macHeader :: MACHeader,
-  beaconFrameBody :: BeaconFrameBody
-} deriving (Data)
 
 -- Source: https://tbhaxor.com/mac-header-format-in-detail/
 data MACHeader = MACHeader {
