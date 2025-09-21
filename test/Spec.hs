@@ -3,6 +3,7 @@ import Router.Layers.Ethernet as Ethernet
 import Router.Layers as Layers
 import Router.Packet as Packet
 import Router.Packer as Packer
+import Foreign (free)
 
 main :: IO ()
 main = hspec $ do
@@ -22,18 +23,24 @@ main = hspec $ do
     it "Should " $ do -- todo actualy finish this test
       let eth = Layers.Ethernet [0, 0, 0, 0, 0, 0] [0, 0, 0, 0, 0, 0] Ethernet.IPv4Packet
           ethernetLayer = Layers.PacketLinkLayer (Layers.LinkLayerEth eth)
-          ip = Layers.Ip 0 0 0 0 0 0 0 0 0 0 [] ethernetLayer
+          ip = Layers.Ip 0x45 0 0 0 0 0 0 0 0 0 [] ethernetLayer
           ipLayer = Layers.PacketNetworkLayer (Layers.NetworkLayerIp ip)
           tcp = Layers.Tcp 0 0 0 0 0 0 0 0 0 0 0 ipLayer
           tcpLayer = Layers.PacketTransferLayer (Layers.TransferLayerTcp tcp)
-
-          
 
           packet = Packet.Packet tcpLayer
           fields = Packer.getFields packet
           recursiveFields = Packer.getRecursiveFields (topLayer packet)
           convertedFields = Packer.convertFields recursiveFields 
 
-      _ <- putStrLn (Prelude.show convertedFields)
+      (ptr, len, ws) <- Packer.pack packet
+
+      putStrLn $ Prelude.show ws
+
+      -- interface <- openLive "wlo1" 65535 False 0
+      -- sendPacket interface ptr len
+
+      free ptr
+
       -- _ <- putStrLn (Prelude.show fields)
       True `shouldBe` True
