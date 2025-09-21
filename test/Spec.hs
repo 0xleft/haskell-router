@@ -34,6 +34,20 @@ main = hspec $ do
       (destinationMacAddress mac) `shouldBe` [255,255,255,255,255,255]
       (duration mac) `shouldBe` 10
       (seqControl mac) `shouldBe` 0x0010
+    
+    it "Test FrameBody builder" $ do
+      let body = setFrameBodyBeaconInterval 5000 
+                  . setFrameBodyCapabilityInfo 0x1501
+                  . setFrameBodySSID "Super Awesome Network"
+                  . setFrameBodyTimeStamp 12347890
+                  . setFrameBodySupportedRates [1,100,69]
+                  $ defaultFrameBody
+      (tagLength (ssid body)) `shouldBe` 21
+      (ssidName (ssid body)) `shouldBe` "Super Awesome Network"
+      (allSupportedRates (supportedRates body)) `shouldBe` [0x01+128, 0x64+128, 0x45+128]
+      (capabilityInfo body) `shouldBe` 0x1501
+      (timeStamp body) `shouldBe` 0xbc69f2
+
                 
 
 

@@ -12,7 +12,13 @@ module Router.Layers.BeaconFrame (
   setMacHeaderDestination,
   setMacHeaderDuration,
   setMacHeaderSeqControl,
-  defaultMacHeader
+  defaultMacHeader,
+  defaultFrameBody,
+  setFrameBodyBeaconInterval,
+  setFrameBodyCapabilityInfo,
+  setFrameBodySSID,
+  setFrameBodyTimeStamp,
+  setFrameBodySupportedRates
 ) where
 
 import Router.Util (intToWord8)
@@ -51,25 +57,25 @@ data MACHeader = MACHeader {
 data BeaconFrameBody = BeaconFrameBody { 
   timeStamp :: Word64, -- Time in microseconds since the access point has been active
   beaconInterval :: Word16, -- Time in TU (1 TU = 1024 microseconds) ; default = 100 TU (102.4 milliseconds)
-  capableInformation :: Word16, -- Advertised capabilities of network
-  ssid :: SSID
+  capabilityInfo :: Word16, -- Advertised capabilities of network
+  ssid :: SSID,
+  supportedRates :: SupportedRates
 } deriving (Data)
 
 -- https://mrncciew.com/2014/10/08/802-11-mgmt-beacon-frame/ (Sec. 4 on SSID)
 data SSID = SSID {
   elId :: Word8, -- I think in all cases it should be 0b00
   tagLength :: Word8, -- Just the length if the string
-  ssidName :: String, -- A string with length of tagLength 
-  supportedRates :: SupportedRates --
+  ssidName :: String -- A string with length of tagLength 
 } deriving (Data)
 
 getSSID :: String -> SSID
-getSSID "" = SSID (0) (0) ("\0") getDefaultSupportedRates
+getSSID "" = SSID (0) (0) ("") 
 getSSID string =
   let str_len = (length string)
   in if (str_len > 32)
     then error "SSID name is too long"
-    else SSID (0) (intToWord8 str_len) string getDefaultSupportedRates
+    else SSID (0) (intToWord8 str_len) string 
 
 data SupportedRates = SupportedRates {
   elId :: Word8,
@@ -77,8 +83,8 @@ data SupportedRates = SupportedRates {
   allSupportedRates :: [Word8] -- Array of size(length) that contains all the supported rates
 } deriving (Data)
 
-getDefaultSupportedRates :: SupportedRates
-getDefaultSupportedRates = SupportedRates 0 0 [] -- TODO: MAKE THESE VALUES MAKE SENSE
+defaultSupportedRates :: SupportedRates
+defaultSupportedRates = SupportedRates 0 0 [] -- TODO: MAKE THESE VALUES MAKE SENSE
 
 -- Rates is in Int * 500Kbps, thus 12 = (12 * 500kbps) = 6 Mbps
 -- 7th bit is flipped on by default to set it to basic rate, intead of supported rate
@@ -87,6 +93,30 @@ getSupportedRates rates =
   SupportedRates  (0)
                   (intToWord8 (length rates)) 
                   (map (\r -> (intToWord8 r) .|. 128) rates)
+
+setFrameBodyTimeStamp :: Int -> BeaconFrameBody -> BeaconFrameBody
+setFrameBodyTimeStamp time body = body {timeStamp = (fromIntegral time) :: Word64}
+
+setFrameBodyBeaconInterval :: Int -> BeaconFrameBody -> BeaconFrameBody
+setFrameBodyBeaconInterval time body = body {beaconInterval = (fromIntegral time) :: Word16}
+
+setFrameBodyCapabilityInfo :: Word16 -> BeaconFrameBody -> BeaconFrameBody
+setFrameBodyCapabilityInfo cap body = body {capabilityInfo = cap}
+
+setFrameBodySSID :: String -> BeaconFrameBody -> BeaconFrameBody
+setFrameBodySSID name body = body {ssid = (getSSID name)}
+
+setFrameBodySupportedRates :: [Int] -> BeaconFrameBody-> BeaconFrameBody
+setFrameBodySupportedRates xs body = body {supportedRates = getSupportedRates xs}
+
+
+defaultFrameBody :: BeaconFrameBody
+defaultFrameBody = 
+  BeaconFrameBody  {timeStamp = 0,
+                    beaconInterval = 100,
+                    capabilityInfo = 0x1511,
+                    ssid = getSSID "Awesome Network",
+                    supportedRates = defaultSupportedRates}
 
 
 -- TODO: Make an actual buider for the FramControl
