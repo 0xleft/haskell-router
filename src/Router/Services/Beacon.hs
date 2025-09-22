@@ -14,9 +14,8 @@ import Foreign (free)
 
 start :: IO ()
 start = do
-  defaultMac <- defaultMacHeader
   interface <- openLive "wlo1" 65535 False 0 -- todo replace the interface to get from command line
-  beaconLoop 1024 interface defaultFrameBody defaultMac 0
+  beaconLoop 1024 interface defaultFrameBody defaultMacHeader 0
   return ()
 
 beaconLoop :: Int -> PcapHandle -> BeaconFrameBody -> MACHeader -> Int -> IO ()

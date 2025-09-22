@@ -139,12 +139,11 @@ hexStringToHex [x,y]
     in hexTot
 hexStringToHex _ = error "Please enter a string of length 2"
 
-defaultMacHeader :: IO MACHeader
-defaultMacHeader = do  
-  s <- macAddress
-  return MACHeader {sourceMacAddress = getMacAddress s,
+defaultMacHeader :: MACHeader
+defaultMacHeader = 
+  MACHeader {sourceMacAddress = getMacAddress macAddress,
                 destinationMacAddress = getMacAddress "ff:ff:ff:ff:ff:ff",
-                bSsidMacAddress = getMacAddress s,
+                bSsidMacAddress = getMacAddress macAddress,
                 duration = 0,
                 seqControl = 0,
                 frameControl = 0x8000}
