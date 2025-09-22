@@ -23,12 +23,11 @@ main = hspec $ do
       s `shouldBe` [0xe6, 0xcd, 0xac, 0x8e, 0x0e, 0x35]
       
     it "Test MACHeader builder" $ do
-      defaultMac <- BeaconFrame.defaultMacHeader
       let mac = BeaconFrame.setMacHeaderBSsid "00:00:00:00:00:08"
                 . BeaconFrame.setMacHeaderDuration 10
                 . BeaconFrame.setMacHeaderDestination "ff:ff:ff:ff:ff:ff"
                 . BeaconFrame.setMacHeaderSeqControl 1 0
-                $ defaultMac
+                $ BeaconFrame.defaultMacHeader
       (BeaconFrame.bSsidMacAddress mac) `shouldBe` [0,0,0,0,0,0x08]
       (BeaconFrame.destinationMacAddress mac) `shouldBe` [255,255,255,255,255,255]
       (BeaconFrame.duration mac) `shouldBe` 10
