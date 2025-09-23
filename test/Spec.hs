@@ -4,8 +4,8 @@ import Router.Layers as Layers
 import Router.Packet as Packet
 import Router.Packer as Packer
 import Foreign (free)
-import Network.Pcap (openLive, sendPacket)
 import Router.Layers.BeaconFrame as BeaconFrame
+import Network.Pcap (openLive, sendPacketBS)
 
 main :: IO ()
 main = hspec $ do
@@ -71,14 +71,18 @@ main = hspec $ do
           recursiveFields = Packer.getRecursiveFields (topLayer packet)
           convertedFields = Packer.convertFields recursiveFields 
 
-      (ptr, len, ws) <- Packer.pack packet
+          packed = Packer.pack packet
 
-      putStrLn $ Prelude.show ws
+      putStrLn $ Prelude.show packed
 
       -- interface <- openLive "wlo1" 65535 False 0
-      -- sendPacket interface ptr len
+      -- sendPacketBS interface ptr len
 
-      free ptr
+      -- loopBS interface (-1) (\header body -> putStrLn (show body))
 
       -- _ <- putStrLn (Prelude.show fields)
+      True `shouldBe` True
+  
+  describe "Should test packet parser" $ do
+    it "Shoud " $ do
       True `shouldBe` True
